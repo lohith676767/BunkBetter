@@ -76,14 +76,16 @@ Read the grid and the legend/key table (mapping short codes to full course title
 
 Be careful to place each entry under the correct day and the correct starting period. Output only the JSON — no commentary.`;
 
-export async function parseTimetableImages(
-  images: PreparedImage[],
-  apiKey: string,
-  model = 'gemini-3.5-flash',
-): Promise<ParsedTimetable> {
-  if (images.length === 0) throw new Error('Add at least one photo first.');
-  if (!apiKey.trim()) throw new Error('Add your Gemini API key first.');
+/**
+ * Google renames/retires dated Gemini model IDs fairly often, so instead of pinning one exact
+ * version we try their self-updating aliases first (always the current default flash model),
+ * then fall back through a few recent dated names in case an alias isn't resolving.
+ */
+const MODEL_CANDIDATES = ['gemini-flash-latest', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
 
+class ModelNotFoundError extends Error {}
+
+async function requestModel(model: string, images: PreparedImage[], apiKey: string): Promise<ParsedTimetable> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
 
   const body = {
@@ -119,6 +121,7 @@ export async function parseTimetableImages(
       /* ignore */
     }
     if (res.status === 400 && /API key/i.test(detail)) throw new Error('That API key was rejected — double-check it in Settings.');
+    if (res.status === 404 || /not found|not supported/i.test(detail)) throw new ModelNotFoundError(detail);
     throw new Error(detail || `Gemini request failed (${res.status}).`);
   }
 
@@ -136,4 +139,28 @@ export async function parseTimetableImages(
     throw new Error('Incomplete result — try a clearer photo, or set up manually.');
   }
   return parsed;
+}
+
+export async function parseTimetableImages(
+  images: PreparedImage[],
+  apiKey: string,
+  model?: string,
+): Promise<ParsedTimetable> {
+  if (images.length === 0) throw new Error('Add at least one photo first.');
+  if (!apiKey.trim()) throw new Error('Add your Gemini API key first.');
+
+  const candidates = model ? [model] : MODEL_CANDIDATES;
+  let lastError: Error = new Error('No Gemini model in the candidate list is available.');
+  for (const candidate of candidates) {
+    try {
+      return await requestModel(candidate, images, apiKey);
+    } catch (err) {
+      if (err instanceof ModelNotFoundError) {
+        lastError = err;
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError;
 }

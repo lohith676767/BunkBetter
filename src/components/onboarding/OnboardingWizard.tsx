@@ -3,9 +3,16 @@ import { useAppStore } from '../../store/useAppStore';
 import { ALL_DAYS, DAY_LABELS, type DayOfWeek } from '../../types';
 import { SubjectManager } from '../SubjectManager';
 import { DayTimetableEditor } from '../timetable/DayTimetableEditor';
+import { ImportFromPhoto } from '../ImportFromPhoto';
 import { Button } from '../ui/Button';
 
-const STEP_TITLES = ["Let's set your schedule", 'Add your subjects', 'Build your timetable', "You're all set"];
+const STEP_TITLES = [
+  "Let's set your schedule",
+  'Import your timetable',
+  'Add your subjects',
+  'Build your timetable',
+  "You're all set",
+];
 
 export function OnboardingWizard() {
   const settings = useAppStore((s) => s.settings);
@@ -22,7 +29,7 @@ export function OnboardingWizard() {
     updateSettings({ activeDays: next });
   }
 
-  const canProceed = step === 1 ? subjects.length > 0 : true;
+  const canProceed = step === 2 ? subjects.length > 0 : true;
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col bg-neutral-50 px-5 py-8 dark:bg-neutral-950">
@@ -104,6 +111,17 @@ export function OnboardingWizard() {
         )}
 
         {step === 1 && (
+          <div className="space-y-4">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              Got a photo of your class timetable? Let AI read it and fill in your subjects and weekly grid for you —
+              you'll still get to review and edit everything before you're done.
+            </p>
+            <ImportFromPhoto onImported={() => setStep(2)} />
+            <p className="text-center text-xs text-neutral-400">Or just hit Continue to set it up manually instead.</p>
+          </div>
+        )}
+
+        {step === 2 && (
           <div className="space-y-3">
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               Add every subject you attend classes for. You can edit these anytime later.
@@ -112,7 +130,7 @@ export function OnboardingWizard() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="space-y-3">
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               Tap a period to assign a subject. Labs or clumped classes can span up to 3 back-to-back periods. You
@@ -122,7 +140,7 @@ export function OnboardingWizard() {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div className="space-y-6">
             <section className="space-y-2">
               <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">

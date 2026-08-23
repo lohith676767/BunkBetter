@@ -87,6 +87,8 @@ export interface Settings {
   lunchType: LunchType;
   activeDays: DayOfWeek[];
   onboarded: boolean;
+  /** stored locally on-device only; used to call the Gemini API directly from the browser for photo import */
+  geminiApiKey?: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {

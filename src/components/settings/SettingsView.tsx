@@ -137,6 +137,24 @@ export function SettingsView() {
       </section>
 
       <section className="space-y-2">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">AI import</h2>
+        <input
+          type="password"
+          value={settings.geminiApiKey ?? ''}
+          onChange={(e) => updateSettings({ geminiApiKey: e.target.value })}
+          placeholder="Gemini API key"
+          className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+        />
+        <p className="text-xs text-neutral-400">
+          Used by "Import from photo" in the Timetable tab to read a timetable photo. Free at{' '}
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="underline decoration-dotted">
+            aistudio.google.com/apikey
+          </a>
+          . Stored only on this device.
+        </p>
+      </section>
+
+      <section className="space-y-2">
         <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Backup</h2>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={handleExport}>

@@ -79,7 +79,7 @@ Be careful to place each entry under the correct day and the correct starting pe
 export async function parseTimetableImages(
   images: PreparedImage[],
   apiKey: string,
-  model = 'gemini-2.5-flash',
+  model = 'gemini-3.5-flash',
 ): Promise<ParsedTimetable> {
   if (images.length === 0) throw new Error('Add at least one photo first.');
   if (!apiKey.trim()) throw new Error('Add your Gemini API key first.');

@@ -12,6 +12,9 @@ on:
       - 'capacitor.config.ts'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -57,3 +60,14 @@ jobs:
           name: bunkbetter-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish debug APK to Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk-debug --yes --cleanup-tag -R "$GITHUB_REPOSITORY" || true
+          gh release create apk-debug android/app/build/outputs/apk/debug/app-debug.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "BunkBetter debug APK" \
+            --notes "Auto-built from commit ${{ github.sha }}. Debug-signed, for sideloading only — not for the Play Store." \
+            --target "${{ github.sha }}"
